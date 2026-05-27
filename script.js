@@ -153,29 +153,37 @@ document.addEventListener('DOMContentLoaded', () => {
        7. Contact Form Handling
        ========================================================================== */
     const contactForm = document.getElementById('contact-form');
-    const formSuccess = document.getElementById('form-success');
+const formSuccess = document.getElementById('form-success');
 
-    if (contactForm && formSuccess) {
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            // Simulate form submission
-            const submitBtn = contactForm.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Sending...';
-            submitBtn.disabled = true;
+if (contactForm) {
+  contactForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-            setTimeout(() => {
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-                formSuccess.classList.remove('hidden');
-                contactForm.reset();
+    const btn = contactForm.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = 'Sending... <i class="fa-solid fa-spinner fa-spin ml-2"></i>';
 
-                // Hide success message after 6 seconds
-                setTimeout(() => {
-                    formSuccess.classList.add('hidden');
-                }, 6000);
-            }, 1200);
-        });
+    const formData = new FormData(contactForm);
+
+    try {
+      const response = await fetch('https://formspree.io/f/xbdbpnnj', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (response.ok) {
+        contactForm.reset();
+        formSuccess.classList.remove('hidden');
+        btn.innerHTML = 'Send Message <i class="fa-solid fa-paper-plane ml-2"></i>';
+        btn.disabled = false;
+      } else {
+        throw new Error('Failed');
+      }
+    } catch (err) {
+      btn.innerHTML = 'Failed. Try again <i class="fa-solid fa-triangle-exclamation ml-2"></i>';
+      btn.disabled = false;
     }
+  });
+}
 });
